@@ -47,6 +47,8 @@
 #include "Vehicle.h"
 #include "VehicleComponent.h"
 #include "VideoManager.h"
+#include "VideoManager/VideoReceiver/GStreamer/VideoItemStub.h"
+#include <QtQml/qqml.h>
 
 #ifndef QGC_NO_SERIAL_LINK
 #include "SerialLink.h"
@@ -232,6 +234,10 @@ void QGCApplication::_initVideo()
     // Gstreamer video playback requires OpenGL
     QQuickWindow::setGraphicsApi(QSGRendererInterface::OpenGL);
 #endif
+
+    // Ensure QML import always resolves, even without GStreamer runtime
+    qmlRegisterModule("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0);
+    (void)qmlRegisterType<VideoItemStub>("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0, "GstGLQt6VideoItem");
 
     QGCCorePlugin::instance();  // CorePlugin must be initialized before VideoManager for Video Cleanup
     VideoManager::instance();

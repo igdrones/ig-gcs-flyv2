@@ -9,7 +9,22 @@
 
 import QtQuick
 import QtQuick.Controls
+import QGroundControl
 
-FlightDisplayViewGStreamer {
+Item {
     id: videoBackground
+    anchors.fill: parent
+
+    Loader {
+        id: loader
+        anchors.fill: parent
+        active: QGroundControl.videoManager.hasVideo
+        source: QGroundControl.videoManager.hasVideo ? "qrc:/qml/QGroundControl/FlightDisplay/FlightDisplayViewGStreamer.qml" : ""
+        sourceComponent: QGroundControl.videoManager.hasVideo ? undefined : fallback
+    }
+
+    Component {
+        id: fallback
+        Rectangle { anchors.fill: parent; color: "black" }
+    }
 }

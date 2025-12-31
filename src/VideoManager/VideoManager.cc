@@ -24,9 +24,10 @@
 
 #ifdef QGC_GST_STREAMING
 #include "GStreamer.h"
-#else
-#include "VideoItemStub.h"
+#include <gst/gst.h>
 #endif
+#include "VideoItemStub.h"
+#include <QtQml/qqml.h>
 #include <QtCore/QApplicationStatic>
 #include <QtCore/QDir>
 #include <QtCore/QTimer>
@@ -58,7 +59,21 @@ VideoManager::VideoManager(QObject* parent)
         if (needGst) {
             if (!GStreamer::initialize()) {
                 qCCritical(VideoManagerLog) << "Failed To Initialize GStreamer";
+                qmlRegisterModule("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0);
+                (void)qmlRegisterType<VideoItemStub>("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0, "GstGLQt6VideoItem");
+            } else {
+                GstElementFactory* factory = gst_element_factory_find("qml6glsink");
+                if (factory) {
+                    gst_object_unref(factory);
+                } else {
+                    qCCritical(VideoManagerLog) << "GStreamer initialized but qml6glsink element missing. Falling back to stub.";
+                    qmlRegisterModule("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0);
+                    (void)qmlRegisterType<VideoItemStub>("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0, "GstGLQt6VideoItem");
+                }
             }
+        } else {
+            qmlRegisterModule("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0);
+            (void)qmlRegisterType<VideoItemStub>("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0, "GstGLQt6VideoItem");
         }
     }
 #else
