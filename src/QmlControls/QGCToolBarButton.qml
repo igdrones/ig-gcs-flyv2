@@ -45,11 +45,15 @@ Button {
             id:                     _icon
             height:                 ScreenTools.defaultFontPixelHeight * 2
             width:                  height
-            sourceSize.height:      parent.height
+            // Ensure crisp rendering for multi-color SVG logo
+            crisp:                  logo
+            sourceSize.height:      height
+            sourceSize.width:       width
             fillMode:               Image.PreserveAspectFit
             color:                  logo ? "transparent" : (button.checked ? qgcPal.buttonHighlightText : qgcPal.buttonText)
             source:                 button.icon.source
             anchors.verticalCenter: parent.verticalCenter
+            onStatusChanged:        { if (status === Image.Error) { source = "/res/IGCSFlyNav.ico" } }
         }
         Label {
             id:                     _label

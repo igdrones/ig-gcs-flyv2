@@ -41,6 +41,8 @@
         <file alias="QGCLogoFull.svg">resources/QGCLogoFull.svg</file>
         <file alias="QGCLogoWhite.svg">resources/QGCLogoWhite.svg</file>
         <file alias="IGCSFly.svg">resources/ig-gcs-fly.svg</file>
+        <file alias="IGCSFlyNav.svg">resources/ig-gcs-fly-nav.svg</file>
+        <file alias="IGCSFlyNav.ico">resources/ig-gcs-fly-nav.ico</file>
         <file alias="ApplicationSettings.svg">resources/ApplicationSettings.svg</file>
         <file alias="VehicleConfig.svg">resources/VehicleConfig.svg</file>
         <file alias="QGCLogoArrow.svg">resources/QGCLogoArrow.svg</file>

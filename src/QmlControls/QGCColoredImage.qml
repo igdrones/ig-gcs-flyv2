@@ -8,6 +8,7 @@ import QGroundControl.Controls
 
 Item {
     property color color: "white"   // Image color
+    property bool  crisp: false     // Disable smoothing/mipmaps for pixel-crisp rendering
 
     property alias asynchronous:        image.asynchronous
     property alias cache:               image.cache
@@ -28,13 +29,15 @@ Item {
 
     Image {
         id:                 image
-        smooth:             true
-        mipmap:             true
+        smooth:             crisp ? false : true
+        mipmap:             crisp ? false : true
         antialiasing:       true
         visible:            false
         fillMode:           Image.PreserveAspectFit
         anchors.fill:       parent
+        // Match source size to on-screen size to avoid resampling blur
         sourceSize.height:  height
+        sourceSize.width:   width
     }
 
     ColorOverlay {
