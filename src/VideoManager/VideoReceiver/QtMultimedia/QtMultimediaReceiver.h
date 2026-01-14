@@ -38,6 +38,7 @@ public:
     static void *createVideoSink(QQuickItem *widget, QObject *parent = nullptr);
     static void releaseVideoSink(void *sink);
     static VideoReceiver *createVideoReceiver(QObject *parent);
+    static void setVideoSinkWidget(void *sink, QQuickItem *widget);
 
 public slots:
     void start(uint32_t timeout) override;

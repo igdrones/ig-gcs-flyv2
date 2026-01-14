@@ -23,11 +23,24 @@ Item {
     Loader {
         id: gstViewLoader
         anchors.fill: parent
-        active: QGroundControl.videoManager.hasVideo && QGroundControl.videoManager.gstreamerEnabled
+        active: QGroundControl.videoManager.gstreamerEnabled
         source: "qrc:/qml/QGroundControl/FlightDisplay/FlightDisplayViewGStreamer.qml"
         onLoaded: {
             if (item && streamObjectName.length) {
                 item.objectName = streamObjectName
+                QGroundControl.videoManager.registerVideoWidget(streamObjectName, item)
+            }
+        }
+    }
+    Loader {
+        id: qtmmViewLoader
+        anchors.fill: parent
+        active: QGroundControl.videoManager.qtmultimediaEnabled
+        source: "qrc:/qml/QGroundControl/FlightDisplay/FlightDisplayViewQtMultimedia.qml"
+        onLoaded: {
+            if (item && streamObjectName.length) {
+                item.objectName = streamObjectName
+                QGroundControl.videoManager.registerVideoWidget(streamObjectName, item)
             }
         }
     }

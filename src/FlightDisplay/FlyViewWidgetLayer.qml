@@ -369,11 +369,11 @@ Item {
         id:                 mapScale
         anchors.right:      toolStrip.left
         anchors.top:        parent.top
-        mapControl:         _mapControl
+        mapControl:         _root.mapControl
         buttonsOnLeft:      false
         zoomButtonsVisible: false
         autoHide:           true
-        visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && !isViewer3DOpen && mapControl.pipState.state === mapControl.pipState.fullState
+        visible:            !ScreenTools.isTinyScreen && QGroundControl.corePlugin.options.flyView.showMapScale && !isViewer3DOpen && !!mapControl && !!mapControl.pipState && (mapControl.pipState.state === mapControl.pipState.fullState)
 
         property real topEdgeCenterInset: visible ? y + height : 0
     }

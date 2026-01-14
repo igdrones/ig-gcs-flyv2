@@ -146,11 +146,12 @@ Item {
     Component.onCompleted: calculateScale()
 
     Connections {
-        target: mapControl
+        target: (mapControl !== undefined && mapControl !== null) ? mapControl : null
+        ignoreUnknownSignals: true
         enabled: mapControl !== undefined && mapControl !== null
-        function onWidthChanged() { triggerRecalc() }
-        function onHeightChanged() { triggerRecalc() }
-        function onZoomLevelChanged() { triggerRecalc() }
+        onWidthChanged: triggerRecalc()
+        onHeightChanged: triggerRecalc()
+        onZoomLevelChanged: triggerRecalc()
     }
 
     PropertyAnimation { 

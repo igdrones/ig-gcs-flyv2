@@ -66,6 +66,7 @@ public:
     Q_INVOKABLE void stopVideo();
 
     Q_INVOKABLE void initAfterQmlReady();
+    Q_INVOKABLE void registerVideoWidget(const QString &name, QQuickItem *item);
 
     void init(QQuickWindow *mainWindow);
     void cleanup();

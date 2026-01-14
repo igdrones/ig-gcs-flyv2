@@ -48,7 +48,7 @@ ApplicationWindow {
         if (loggedIn) {
             firstRunPromptManager.nextPrompt()
         }
-        QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.setRawValue(false)
+        QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.rawValue = false
     }
 
     function db() {
@@ -111,7 +111,7 @@ ApplicationWindow {
             tx.executeSql('INSERT INTO session (email, created_at) VALUES (?,?)', [email, Date.now()])
         })
         QGroundControl.linkManager.enableAutoConnect()
-        QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.setRawValue(true)
+        QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.rawValue = true
         firstRunPromptManager.nextPrompt()
     }
 
@@ -398,7 +398,7 @@ ApplicationWindow {
                                 var d = mainWindow.db()
                                 d.transaction(function(tx) { tx.executeSql('DELETE FROM session') })
                                 QGroundControl.linkManager.disableAutoConnect()
-                                QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.setRawValue(false)
+                                QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.rawValue = false
                                 toolDrawer.visible = false
                             }
                         }
@@ -629,8 +629,8 @@ ApplicationWindow {
         }
         contentItem: ColumnLayout {
             spacing: ScreenTools.defaultFontPixelHeight * 0.8
-            width: profilePopup.width - _contentPadding * 2
-            anchors.margins: _contentPadding
+            width: profilePopup.width - profilePopup._contentPadding * 2
+            anchors.margins: profilePopup._contentPadding
 
             QGCLabel {
                 Layout.fillWidth: true
@@ -664,7 +664,7 @@ ApplicationWindow {
                         tx.executeSql('DELETE FROM session')
                     })
                     QGroundControl.linkManager.disableAutoConnect()
-                    QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.setRawValue(false)
+                    QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.rawValue = false
                     profilePopup.close()
                 }
             }
@@ -735,7 +735,7 @@ ApplicationWindow {
                             var d = mainWindow.db()
                             d.transaction(function(tx) { tx.executeSql('DELETE FROM session') })
                             QGroundControl.linkManager.disableAutoConnect()
-                            QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.setRawValue(false)
+                            QGroundControl.settingsManager.adsbVehicleManagerSettings.adsbServerConnectEnabled.rawValue = false
                             close()
                         }
                     }

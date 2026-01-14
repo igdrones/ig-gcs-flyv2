@@ -266,6 +266,9 @@ QQmlApplicationEngine *QGCCorePlugin::createQmlApplicationEngine(QObject *parent
     qmlEngine->addImportPath(QStringLiteral("qrc:/qml"));
     qmlEngine->rootContext()->setContextProperty(QStringLiteral("joystickManager"), JoystickManager::instance());
     qmlEngine->rootContext()->setContextProperty(QStringLiteral("debugMessageModel"), QGCLogging::instance());
+#ifdef QGC_GST_STREAMING
+    GStreamer::registerQmlVideoItemType();
+#endif
     return qmlEngine;
 }
 
@@ -304,6 +307,17 @@ void QGCCorePlugin::releaseVideoSink(void *sink)
     QtMultimediaReceiver::releaseVideoSink(sink);
 #else
     Q_UNUSED(sink);
+#endif
+}
+
+void QGCCorePlugin::setVideoSinkWidget(void *sink, QQuickItem *widget)
+{
+#ifdef QGC_GST_STREAMING
+    GStreamer::setVideoSinkWidget(sink, widget);
+#elif defined(QGC_QT_STREAMING)
+    QtMultimediaReceiver::setVideoSinkWidget(sink, widget);
+#else
+    Q_UNUSED(sink); Q_UNUSED(widget);
 #endif
 }
 

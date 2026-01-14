@@ -19,6 +19,8 @@
 #include <QtCore/QSettings>
 #include <QtCore/QStringList>
 #include <QtQuick/QQuickItem>
+#include <QtQml/qqml.h>
+#include "gstqml6gl/qt6/qt6glitem.h"
 
 #include <gst/gst.h>
 
@@ -642,9 +644,36 @@ void releaseVideoSink(void *sink)
     gst_clear_object(&videoSink);
 }
 
+void setVideoSinkWidget(void *sink, QQuickItem *widget)
+{
+    if (!sink) {
+        qCWarning(GStreamerLog) << "setVideoSinkWidget called with NULL sink";
+        return;
+    }
+    if (widget && !widget->inherits("Qt6GLVideoItem")) {
+        qCWarning(GStreamerLog) << "Invalid video widget type for qml6glsink:"
+                                << widget->metaObject()->className();
+        widget = nullptr;
+    }
+    GstElement *videoSinkBin = GST_ELEMENT(sink);
+    g_object_set(videoSinkBin, "widget", widget, NULL);
+}
+
 VideoReceiver *createVideoReceiver(QObject *parent)
 {
     return new GstVideoReceiver(parent);
+}
+
+void registerQmlVideoItemType()
+{
+    static bool registered = false;
+    if (registered) {
+        return;
+    }
+    extern void qt6_element_init(GstPlugin *plugin);
+    Q_UNUSED(qt6_element_init);
+    qmlRegisterType<Qt6GLVideoItem>("org.freedesktop.gstreamer.Qt6GLVideoItem", 1, 0, "GstGLQt6VideoItem");
+    registered = true;
 }
 
 } // namespace GStreamer

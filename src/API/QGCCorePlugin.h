@@ -115,6 +115,8 @@ public:
     virtual void *createVideoSink(QQuickItem *widget, QObject *parent);
     /// Allows the plugin to override the release of VideoSink.
     virtual void releaseVideoSink(void *sink);
+    /// Allows the plugin to assign a widget to an existing VideoSink.
+    virtual void setVideoSinkWidget(void *sink, QQuickItem *widget);
 
     /// Allows the plugin to see all mavlink traffic to a vehicle
     /// @return true: Allow vehicle to continue processing, false: Vehicle should not process message

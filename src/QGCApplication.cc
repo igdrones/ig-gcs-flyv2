@@ -173,20 +173,23 @@ void QGCApplication::setLanguage()
     removeTranslator(&_qgcTranslatorQtLibs);
     if (_locale.name() != "en_US") {
         QLocale::setDefault(_locale);
-        if (_qgcTranslatorQtLibs.load("qt_" + _locale.name(), QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+        const bool libsOk = _qgcTranslatorQtLibs.load("qt_" + _locale.name(), QLibraryInfo::path(QLibraryInfo::TranslationsPath));
+        if (libsOk) {
             installTranslator(&_qgcTranslatorQtLibs);
         } else {
             qCWarning(QGCApplicationLog) << "Qt lib localization for" << _locale.name() << "is not present";
         }
-        if (_qgcTranslatorSourceCode.load(_locale, QLatin1String("qgc_source_"), "", ":/i18n")) {
+        const bool sourceOk = _qgcTranslatorSourceCode.load(_locale, QLatin1String("qgc_source_"), "", ":/i18n");
+        if (sourceOk) {
             installTranslator(&_qgcTranslatorSourceCode);
-        } else {
-            qCWarning(QGCApplicationLog) << "Error loading source localization for" << _locale.name();
         }
-        if (JsonHelper::translator()->load(_locale, QLatin1String("qgc_json_"), "", ":/i18n")) {
+        const bool jsonOk = JsonHelper::translator()->load(_locale, QLatin1String("qgc_json_"), "", ":/i18n");
+        if (jsonOk) {
             installTranslator(JsonHelper::translator());
-        } else {
-            qCWarning(QGCApplicationLog) << "Error loading json localization for" << _locale.name();
+        }
+        if (!sourceOk && !jsonOk) {
+            _locale = QLocale(QLocale::English, QLocale::UnitedStates);
+            QLocale::setDefault(_locale);
         }
     }
 
@@ -275,7 +278,18 @@ void QGCApplication::_initForNormalAppBoot()
     QObject::connect(_qmlAppEngine, &QQmlApplicationEngine::objectCreationFailed, this, QCoreApplication::quit, Qt::QueuedConnection);
     QGCCorePlugin::instance()->createRootWindow(_qmlAppEngine);
 
-    AudioOutput::instance()->init(SettingsManager::instance()->appSettings()->audioMuted());
+    {
+        Fact* audioMutedFact = SettingsManager::instance()->appSettings()->audioMuted();
+        if (!audioMutedFact->rawValue().toBool()) {
+            AudioOutput::instance()->init(audioMutedFact);
+        } else {
+            (void) connect(audioMutedFact, &Fact::valueChanged, this, [audioMutedFact]() {
+                if (!audioMutedFact->rawValue().toBool()) {
+                    AudioOutput::instance()->init(audioMutedFact);
+                }
+            });
+        }
+    }
     FollowMe::instance()->init();
     QGCPositionManager::instance()->init();
     LinkManager::instance()->init();

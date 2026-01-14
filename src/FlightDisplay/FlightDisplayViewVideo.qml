@@ -123,7 +123,7 @@ Item {
                 Loader {
                     id:             videoContentLoader
                     anchors.fill:   parent
-                    active:         QGroundControl.videoManager.hasVideo
+                    active:         QGroundControl.videoManager.gstreamerEnabled || QGroundControl.videoManager.qtmultimediaEnabled
                     source:         "qrc:/qml/QGroundControl/FlightDisplay/QGCVideoBackground.qml"
                     onLoaded: {
                         if (item) {
@@ -452,7 +452,7 @@ Item {
                 id:             thermalVideoLoader
                 anchors.fill:   parent
                 opacity:        _camera ? (_camera.thermalMode === MavlinkCameraControl.THERMAL_BLEND ? _camera.thermalOpacity / 100 : 1.0) : 0
-                active:         QGroundControl.videoManager.hasVideo
+                active:         QGroundControl.videoManager.gstreamerEnabled || QGroundControl.videoManager.qtmultimediaEnabled
                 source:         "qrc:/qml/QGroundControl/FlightDisplay/QGCVideoBackground.qml"
                 onLoaded: {
                     if (item) {

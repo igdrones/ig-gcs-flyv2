@@ -9,6 +9,7 @@ import QGroundControl.Controls
 Item {
     property color color: "white"   // Image color
     property bool  crisp: false     // Disable smoothing/mipmaps for pixel-crisp rendering
+    property bool  _overlayEnabled: color.a > 0
 
     property alias asynchronous:        image.asynchronous
     property alias cache:               image.cache
@@ -32,7 +33,7 @@ Item {
         smooth:             crisp ? false : true
         mipmap:             crisp ? false : true
         antialiasing:       true
-        visible:            false
+        visible:            !_overlayEnabled
         fillMode:           Image.PreserveAspectFit
         anchors.fill:       parent
         // Match source size to on-screen size to avoid resampling blur
@@ -44,5 +45,6 @@ Item {
         anchors.fill:       image
         source:             image
         color:              parent.color
+        visible:            _overlayEnabled
     }
 }

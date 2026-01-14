@@ -140,6 +140,12 @@ VideoReceiver *QtMultimediaReceiver::createVideoReceiver(QObject *parent)
     return new QtMultimediaReceiver(nullptr);
 }
 
+void QtMultimediaReceiver::setVideoSinkWidget(void *sink, QQuickItem *widget)
+{
+    Q_UNUSED(sink);
+    Q_UNUSED(widget);
+}
+
 void QtMultimediaReceiver::start(uint32_t timeout)
 {
     qCDebug(QtMultimediaReceiverLog) << Q_FUNC_INFO;

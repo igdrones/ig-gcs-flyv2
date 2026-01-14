@@ -135,6 +135,13 @@ void VideoManager::_initAfterQmlIsReady() {
 
         _initVideoReceiver(receiver, _mainWindow);
     }
+
+    if (_videoSettings->streamEnabled()->rawValue().toBool() && !_videoSettings->streamConfigured()) {
+        const QString currentSource = _videoSettings->videoSource()->rawValue().toString();
+        if (currentSource.isEmpty() || currentSource == VideoSettings::videoSourceNoVideo || currentSource == VideoSettings::videoDisabled) {
+            _videoSettings->videoSource()->setRawValue(VideoSettings::videoSourceUDPH264);
+        }
+    }
 }
 
 void VideoManager::cleanup() {
@@ -672,6 +679,26 @@ void VideoManager::_startReceiver(VideoReceiver* receiver) {
     const uint32_t timeout =
         ((source == VideoSettings::videoSourceRTSP) ? _videoSettings->rtspTimeout()->rawValue().toUInt() : 3);
 
+#ifdef QGC_GST_STREAMING
+    if (!receiver->widget()) {
+        qCDebug(VideoManagerLog) << "Video widget is NULL" << receiver->name();
+        return;
+    }
+    if (!GStreamer::initialize()) {
+        qCCritical(VideoManagerLog) << "Failed To Initialize GStreamer";
+        return;
+    }
+#endif
+
+    if (!receiver->sink()) {
+        void* sink = QGCCorePlugin::instance()->createVideoSink(receiver->widget(), receiver);
+        if (!sink) {
+            qCCritical(VideoManagerLog) << "createVideoSink() failed" << receiver->name();
+            return;
+        }
+        receiver->setSink(sink);
+    }
+
     receiver->start(timeout);
 }
 
@@ -680,17 +707,10 @@ void VideoManager::_initVideoReceiver(VideoReceiver* receiver, QQuickWindow* win
         qCWarning(VideoManagerLog) << "Receiver already initialized";
     }
 
-    QQuickItem* widget = window->findChild<QQuickItem*>(receiver->name());
-    if (!widget) {
-        qCCritical(VideoManagerLog) << "stream widget not found" << receiver->name();
+    QQuickItem* widget = window ? window->findChild<QQuickItem*>(receiver->name()) : nullptr;
+    if (widget) {
+        receiver->setWidget(widget);
     }
-    receiver->setWidget(widget);
-
-    void* sink = QGCCorePlugin::instance()->createVideoSink(receiver->widget(), receiver);
-    if (!sink) {
-        qCCritical(VideoManagerLog) << "createVideoSink() failed" << receiver->name();
-    }
-    receiver->setSink(sink);
 
     (void)connect(receiver, &VideoReceiver::onStartComplete, this, [this, receiver](VideoReceiver::STATUS status) {
         if (!receiver) {
@@ -820,6 +840,42 @@ void VideoManager::initAfterQmlReady() {
 }
 
 /*===========================================================================*/
+
+void VideoManager::registerVideoWidget(const QString &name, QQuickItem *item) {
+    if (!item) {
+        qCWarning(VideoManagerLog) << "registerVideoWidget called with NULL item for" << name;
+        return;
+    }
+    for (VideoReceiver* receiver : std::as_const(_videoReceivers)) {
+        if (receiver && receiver->name() == name) {
+            receiver->setWidget(item);
+            if (receiver->sink()) {
+                QGCCorePlugin::instance()->setVideoSinkWidget(receiver->sink(), receiver->widget());
+                qCDebug(VideoManagerLog) << "Assigned video widget to sink for" << receiver->name();
+            } else {
+#ifdef QGC_GST_STREAMING
+                if (!GStreamer::initialize()) {
+                    qCCritical(VideoManagerLog) << "Failed To Initialize GStreamer";
+                    return;
+                }
+#endif
+                void* sink = QGCCorePlugin::instance()->createVideoSink(receiver->widget(), receiver);
+                receiver->setSink(sink);
+                if (!sink) {
+                    qCCritical(VideoManagerLog) << "createVideoSink() failed" << receiver->name();
+                }
+                else {
+                    qCDebug(VideoManagerLog) << "Created video sink for" << receiver->name();
+                }
+            }
+            if (hasVideo()) {
+                _startReceiver(receiver);
+            }
+            return;
+        }
+    }
+    qCWarning(VideoManagerLog) << "registerVideoWidget: receiver not found for" << name;
+}
 
 FinishVideoInitialization::FinishVideoInitialization() : QRunnable() {
     // qCDebug(VideoManagerLog) << this;
